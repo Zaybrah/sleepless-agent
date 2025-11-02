@@ -66,6 +66,16 @@ SLEEPLESS_POLL_INTERVAL=250            # Queue poll interval (ms)
 CLAUDE_MODEL=claude-sonnet-4-5-20250929  # Model to use
 CLAUDE_MAX_RETRIES=3                     # Retry attempts
 CLAUDE_RETRY_DELAY=60                    # Retry delay (seconds)
+
+# Z.ai Configuration (Alternative API Provider)
+# Uncomment these if using Z.ai instead of Claude Code Pro
+# See docs/guides/z-ai-setup.md for complete instructions
+# ANTHROPIC_AUTH_TOKEN=your-zai-api-key    # Your Z.ai API key
+# ANTHROPIC_BASE_URL=https://api.z.ai/api/anthropic  # Z.ai API endpoint
+# API_TIMEOUT_MS=3000000                   # Extended timeout for Z.ai
+# ANTHROPIC_DEFAULT_HAIKU_MODEL=GLM-4.5-Air   # Fast GLM model
+# ANTHROPIC_DEFAULT_SONNET_MODEL=GLM-4.6      # Balanced GLM model
+# ANTHROPIC_DEFAULT_OPUS_MODEL=GLM-4.6        # High-quality GLM model
 ```
 
 ### 4. Environment Variable Precedence
@@ -204,7 +214,56 @@ logging:
 
 ## Environment-Specific Configurations
 
-### 1. Development Environment
+### 1. Using Z.ai as Alternative Provider
+
+If you're using Z.ai instead of Claude Code Pro, you need to configure additional environment variables. Z.ai provides access to GLM models and doesn't have the same daily usage limits.
+
+**Quick Setup:**
+
+1. Get your Z.ai API key from [Z.ai Open Platform](https://open.bigmodel.cn/)
+
+2. Configure Claude Code to use Z.ai (choose one method):
+
+   **Method A: Via Claude Settings File** (Recommended)
+   
+   Edit or create `~/.claude/settings.json`:
+   ```json
+   {
+     "env": {
+       "ANTHROPIC_AUTH_TOKEN": "your_zai_api_key_here",
+       "ANTHROPIC_BASE_URL": "https://api.z.ai/api/anthropic",
+       "API_TIMEOUT_MS": "3000000",
+       "ANTHROPIC_DEFAULT_HAIKU_MODEL": "GLM-4.5-Air",
+       "ANTHROPIC_DEFAULT_SONNET_MODEL": "GLM-4.6",
+       "ANTHROPIC_DEFAULT_OPUS_MODEL": "GLM-4.6"
+     }
+   }
+   ```
+
+   **Method B: Via Environment Variables**
+   
+   Add to your `.env` file:
+   ```bash
+   ANTHROPIC_AUTH_TOKEN=your_zai_api_key_here
+   ANTHROPIC_BASE_URL=https://api.z.ai/api/anthropic
+   API_TIMEOUT_MS=3000000
+   ANTHROPIC_DEFAULT_SONNET_MODEL=GLM-4.6
+   ```
+
+3. Disable usage monitoring in `config.yaml`:
+   ```yaml
+   claude_code:
+     skip_usage_check: true  # Required for Z.ai
+   ```
+
+4. Test the configuration:
+   ```bash
+   claude "Hello, test Z.ai integration"
+   ```
+
+**For complete Z.ai setup instructions, see [Z.ai Configuration Guide](z-ai-setup.md).**
+
+### 2. Development Environment
 
 `.env.development`:
 ```bash
