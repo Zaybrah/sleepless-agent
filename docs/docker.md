@@ -14,7 +14,7 @@ This guide covers how to run Sleepless Agent using Docker and Docker Compose.
 
 1. **Clone the repository:**
    ```bash
-   git clone <repository-url>
+   git clone https://github.com/Zaybrah/sleepless-agent.git
    cd sleepless-agent
    ```
 

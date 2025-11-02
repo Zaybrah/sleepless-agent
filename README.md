@@ -391,7 +391,7 @@ The easiest way to run Sleepless Agent is using Docker:
 
 ```bash
 # Clone and setup
-git clone <repo-url>
+git clone https://github.com/Zaybrah/sleepless-agent.git
 cd sleepless-agent
 cp .env.example .env
 # Edit .env with your tokens
