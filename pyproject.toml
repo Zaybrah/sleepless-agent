@@ -35,6 +35,8 @@ dependencies = [
     "psutil",
     "claude-agent-sdk",
     "requests",
+    "fastapi",
+    "uvicorn[standard]",
 ]
 
 [project.scripts]
@@ -48,7 +50,7 @@ Repository = "https://github.com/context-machine-lab/sleepless-agent"
 package-dir = {"" = "src"}
 
 [tool.setuptools.package-data]
-"sleepless_agent" = ["config.yaml"]
+"sleepless_agent" = ["config.yaml", "interfaces/web_ui/static/*", "interfaces/web_ui/templates/*"]
 
 [tool.setuptools.packages.find]
 where = ["src"]

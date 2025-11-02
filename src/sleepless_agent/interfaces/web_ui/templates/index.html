@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sleepless Agent - Configuration</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🤖 Sleepless Agent Configuration</h1>
+            <p class="subtitle">Configure your 24/7 AI agent settings</p>
+        </header>
+
+        <div id="message" class="message"></div>
+
+        <div class="config-section">
+            <h2>🔧 Claude Code Settings</h2>
+            <div class="form-group">
+                <label for="claude-binary">Binary Path:</label>
+                <input type="text" id="claude-binary" placeholder="claude">
+            </div>
+            <div class="form-group">
+                <label for="claude-model">Model:</label>
+                <input type="text" id="claude-model" placeholder="claude-sonnet-4-5-20250929">
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="threshold-day">Day Threshold (%):</label>
+                    <input type="number" id="threshold-day" min="0" max="100" step="0.1">
+                </div>
+                <div class="form-group">
+                    <label for="threshold-night">Night Threshold (%):</label>
+                    <input type="number" id="threshold-night" min="0" max="100" step="0.1">
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="night-start">Night Start Hour:</label>
+                    <input type="number" id="night-start" min="0" max="23">
+                </div>
+                <div class="form-group">
+                    <label for="night-end">Night End Hour:</label>
+                    <input type="number" id="night-end" min="0" max="23">
+                </div>
+            </div>
+        </div>
+
+        <div class="config-section">
+            <h2>🔀 Git Settings</h2>
+            <div class="form-group">
+                <label>
+                    <input type="checkbox" id="git-use-remote"> Use Remote Repository
+                </label>
+            </div>
+            <div class="form-group">
+                <label for="git-remote-url">Remote Repository URL:</label>
+                <input type="text" id="git-remote-url" placeholder="git@github.com:username/repo.git">
+            </div>
+            <div class="form-group">
+                <label>
+                    <input type="checkbox" id="git-auto-create"> Auto Create Repository
+                </label>
+            </div>
+        </div>
+
+        <div class="config-section">
+            <h2>⚙️ Agent Settings</h2>
+            <div class="form-group">
+                <label for="workspace-root">Workspace Root:</label>
+                <input type="text" id="workspace-root" placeholder="./workspace">
+            </div>
+            <div class="form-group">
+                <label for="task-timeout">Task Timeout (seconds):</label>
+                <input type="number" id="task-timeout" min="60" step="60">
+            </div>
+        </div>
+
+        <div class="config-section">
+            <h2>🤝 Multi-Agent Workflow</h2>
+            <div class="workflow-agent">
+                <h3>Planner Agent</h3>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>
+                            <input type="checkbox" id="planner-enabled"> Enabled
+                        </label>
+                    </div>
+                    <div class="form-group">
+                        <label for="planner-turns">Max Turns:</label>
+                        <input type="number" id="planner-turns" min="1">
+                    </div>
+                </div>
+            </div>
+            <div class="workflow-agent">
+                <h3>Worker Agent</h3>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>
+                            <input type="checkbox" id="worker-enabled"> Enabled
+                        </label>
+                    </div>
+                    <div class="form-group">
+                        <label for="worker-turns">Max Turns:</label>
+                        <input type="number" id="worker-turns" min="1">
+                    </div>
+                </div>
+            </div>
+            <div class="workflow-agent">
+                <h3>Evaluator Agent</h3>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>
+                            <input type="checkbox" id="evaluator-enabled"> Enabled
+                        </label>
+                    </div>
+                    <div class="form-group">
+                        <label for="evaluator-turns">Max Turns:</label>
+                        <input type="number" id="evaluator-turns" min="1">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="config-section">
+            <h2>🔄 Auto Generation</h2>
+            <div class="form-group">
+                <label>
+                    <input type="checkbox" id="auto-gen-enabled"> Enable Auto Generation
+                </label>
+            </div>
+        </div>
+
+        <div class="actions">
+            <button id="save-btn" class="btn btn-primary">💾 Save Configuration</button>
+            <button id="reload-btn" class="btn btn-secondary">🔄 Reload</button>
+        </div>
+
+        <footer>
+            <p>Configuration file: <code id="config-path">Loading...</code></p>
+            <p class="note">⚠️ Changes require daemon restart to take effect</p>
+        </footer>
+    </div>
+
+    <script src="/static/app.js"></script>
+</body>
+</html>
