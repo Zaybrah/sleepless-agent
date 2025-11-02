@@ -115,7 +115,7 @@ curl -I https://api.z.ai/api/anthropic
 For complete setup instructions, troubleshooting, and advanced configuration:
 - **[Complete Z.ai Guide](guides/z-ai-setup.md)** - Full setup guide
 - **[Environment Setup](guides/environment-setup.md)** - All environment variables
-- **[FAQ](faq.md#can-i-use-zai-or-other-alternative-api-providers)** - Common questions
+- **[FAQ](faq.md)** - Common questions about Z.ai and alternative providers
 
 ## 💡 Key Differences from Claude Code Pro
 

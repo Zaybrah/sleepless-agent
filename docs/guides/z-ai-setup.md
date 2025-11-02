@@ -393,4 +393,4 @@ After configuring Z.ai:
 - [Configure Git Integration](git-integration.md)
 - [Set up Slack Bot](slack-setup.md)
 - [Configure Web UI](web-ui.md)
-- [Deploy to Production](../installation.md#deployment)
+- [Read Installation Guide](../installation.md)
