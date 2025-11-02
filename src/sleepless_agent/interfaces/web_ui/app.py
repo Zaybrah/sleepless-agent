@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import asyncio
 import os
 import secrets
 import signal
@@ -244,7 +245,6 @@ async def start_agent(request):
         )
         
         # Give it a moment to start
-        import asyncio
         await asyncio.sleep(1)
         
         # Verify it started
@@ -285,7 +285,6 @@ async def stop_agent(request):
                 proc.terminate()
                 
                 # Wait for graceful shutdown
-                import asyncio
                 await asyncio.sleep(2)
                 
                 # Force kill if still running

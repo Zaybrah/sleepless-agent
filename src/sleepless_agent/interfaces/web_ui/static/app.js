@@ -241,9 +241,29 @@ async function restartAgent() {
     btn.disabled = true;
     
     try {
-        await stopAgent();
+        // Stop the agent first
+        const stopResponse = await fetch('/api/agent/stop', { method: 'POST' });
+        const stopData = await stopResponse.json();
+        
+        if (!stopData.success) {
+            showMessage('❌ Error stopping agent: ' + stopData.error, 'error');
+            btn.disabled = false;
+            return;
+        }
+        
+        showMessage('Agent stopped, waiting before restart...', 'success');
         await new Promise(resolve => setTimeout(resolve, 2000));
-        await startAgent();
+        
+        // Start the agent
+        const startResponse = await fetch('/api/agent/start', { method: 'POST' });
+        const startData = await startResponse.json();
+        
+        if (startData.success) {
+            showMessage('✅ Agent restarted successfully', 'success');
+            await loadAgentStatus();
+        } else {
+            showMessage('❌ Error starting agent: ' + startData.error, 'error');
+        }
     } catch (error) {
         showMessage('❌ Error restarting agent: ' + error.message, 'error');
     } finally {
