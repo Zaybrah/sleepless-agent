@@ -7,17 +7,23 @@
 ### 1. Get API Key
 - Sign up at [Z.ai Open Platform](https://open.bigmodel.cn/)
 - Create an API key from your dashboard
-- Copy the key (starts with your Z.ai credentials)
+- Copy the API key (format: typically starts with letters and numbers, similar to other API keys)
 
 ### 2. Configure Environment
 
-**Option A: Automatic (Recommended)**
+**Option A: Automatic (Recommended - Review First)**
 ```bash
+# Download the script
 curl -O "https://cdn.bigmodel.cn/install/claude_code_zai_env.sh"
+
+# Review the script before running
+cat claude_code_zai_env.sh
+
+# Run the setup
 bash ./claude_code_zai_env.sh
 ```
 
-**Option B: Manual**
+**Option B: Manual (More Secure)**
 
 Edit `~/.claude/settings.json`:
 ```json

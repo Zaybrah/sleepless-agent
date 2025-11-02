@@ -29,10 +29,15 @@ Z.ai provides an automated setup script:
 ```bash
 # Download and run the z.ai configuration script
 curl -O "https://cdn.bigmodel.cn/install/claude_code_zai_env.sh"
+
+# Review the script before running (recommended)
+cat claude_code_zai_env.sh
+
+# Run the setup script
 bash ./claude_code_zai_env.sh
 ```
 
-This script will automatically configure your `~/.claude/settings.json` file with the necessary environment variables.
+**Note:** Always review scripts before executing them. Alternatively, use the manual configuration method below for full control.
 
 ### Option 2: Manual Configuration
 
@@ -72,8 +77,10 @@ To use specific GLM models, add these to your `~/.claude/settings.json`:
 ```
 
 **Available GLM Models:**
-- `GLM-4.5-Air` - Fast, lightweight model (similar to Haiku)
-- `GLM-4.6` - Powerful model (similar to Sonnet/Opus)
+- `GLM-4.5-Air` - Fast, lightweight model (mapped to Haiku tier)
+- `GLM-4.6` - Powerful model (mapped to both Sonnet and Opus tiers)
+
+**Note:** Currently, both Sonnet and Opus are mapped to GLM-4.6 as it's the most capable GLM model. Z.ai may release additional model variants in the future.
 
 #### Step 3: Disable Usage Monitoring
 
