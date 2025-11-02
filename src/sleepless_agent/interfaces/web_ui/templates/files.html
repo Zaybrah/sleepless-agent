@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sleepless Agent - File Browser</title>
+    <link rel="stylesheet" href="/static/style.css">
+    <link rel="stylesheet" href="/static/files.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>📁 Sleepless Agent File Browser</h1>
+            <p class="subtitle">Browse and edit workspace files</p>
+            <div class="header-nav">
+                <a href="/" class="nav-link">⚙️ Configuration</a>
+                <a href="/files" class="nav-link active">📁 Files</a>
+            </div>
+        </header>
+
+        <div id="message" class="message"></div>
+
+        <div class="file-browser">
+            <div class="browser-toolbar">
+                <div class="breadcrumb">
+                    <span id="breadcrumb-container">
+                        <a href="#" data-path="" class="breadcrumb-item">workspace</a>
+                    </span>
+                </div>
+                <div class="toolbar-actions">
+                    <button id="new-file-btn" class="btn btn-small btn-primary">📄 New File</button>
+                    <button id="new-folder-btn" class="btn btn-small btn-primary">📁 New Folder</button>
+                    <button id="refresh-btn" class="btn btn-small btn-secondary">🔄 Refresh</button>
+                </div>
+            </div>
+
+            <div class="browser-content">
+                <div id="file-list" class="file-list">
+                    <div class="loading">Loading...</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- File Editor Modal -->
+        <div id="editor-modal" class="modal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2 id="editor-title">Edit File</h2>
+                    <button id="close-editor-btn" class="close-btn">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <div class="editor-container">
+                        <textarea id="file-editor" spellcheck="false"></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button id="save-file-btn" class="btn btn-success">💾 Save</button>
+                    <button id="cancel-editor-btn" class="btn btn-secondary">Cancel</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- New File/Folder Modal -->
+        <div id="new-item-modal" class="modal">
+            <div class="modal-content modal-small">
+                <div class="modal-header">
+                    <h2 id="new-item-title">Create New Item</h2>
+                    <button id="close-new-item-btn" class="close-btn">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label for="new-item-name">Name:</label>
+                        <input type="text" id="new-item-name" placeholder="Enter name...">
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button id="create-item-btn" class="btn btn-success">Create</button>
+                    <button id="cancel-new-item-btn" class="btn btn-secondary">Cancel</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="/static/files.js"></script>
+</body>
+</html>
