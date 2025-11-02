@@ -268,14 +268,25 @@ The easiest way to configure the agent is through the built-in web interface:
 sle webui
 
 # Access at http://127.0.0.1:8080
+
+# With custom host and port
+sle webui --host 0.0.0.0 --port 8080
+
+# Enable basic authentication (recommended for production)
+export WEBUI_USERNAME=admin
+export WEBUI_PASSWORD=your-secure-password
+sle webui
 ```
 
 The web UI provides a user-friendly interface to configure all agent settings including:
-- Claude Code settings (model, thresholds, night hours)
+- Claude Code settings (model, thresholds, night hours, skip usage check)
 - Git integration (remote repository, auto-create)
 - Agent settings (workspace, timeouts)
 - Multi-agent workflow (planner, worker, evaluator)
 - Auto-generation features
+- **Agent control (start/stop/restart daemon)**
+
+**Security**: Set `WEBUI_PASSWORD` environment variable to enable HTTP Basic Authentication. Leave empty to disable authentication (not recommended for production).
 
 See [Web UI Guide](docs/guides/web-ui.md) for more details.
 
@@ -426,14 +437,22 @@ The easiest way to run Sleepless Agent is using Docker:
 # Clone and setup
 git clone https://github.com/context-machine-lab/sleepless-agent.git
 cd sleepless-agent
-cp .env.example .env
-# Edit .env with your tokens
+cp .env.docker.example .env
+# Edit .env with your tokens and set WEBUI_PASSWORD for security
 
-# Start with Docker Compose
+# Start with Docker Compose (defaults to WebUI on port 8080)
 docker-compose up -d
 
 # View logs
 docker-compose logs -f
+
+# Access WebUI at http://localhost:8080
+```
+
+**Docker Default Behavior**: The Docker container now defaults to running the WebUI instead of the daemon. This allows you to configure the agent and start/stop the daemon through the web interface. To run the daemon directly, override the command:
+
+```bash
+docker run sleepless-agent sle daemon
 ```
 
 For detailed Docker instructions, see [Docker Setup Guide](docs/docker.md).
