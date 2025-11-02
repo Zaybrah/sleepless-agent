@@ -46,6 +46,7 @@ class AutoTaskGenerator:
         threshold_night: float,
         night_start_hour: int = 20,
         night_end_hour: int = 8,
+        skip_usage_check: bool = False,
     ):
         """Initialize auto-generator with database session and config"""
         self.session = db_session
@@ -57,6 +58,7 @@ class AutoTaskGenerator:
         self.threshold_night = threshold_night
         self.night_start_hour = night_start_hour
         self.night_end_hour = night_end_hour
+        self.skip_usage_check = skip_usage_check
 
         # Validate prompt weights sum to approximately 1.0
         if self.config.prompts:
@@ -93,6 +95,11 @@ class AutoTaskGenerator:
         """Check if usage is below pause threshold (use time-based thresholds)"""
         from sleepless_agent.monitoring.pro_plan_usage import ProPlanUsageChecker
         from sleepless_agent.scheduling.time_utils import is_nighttime
+
+        # Skip usage check if configured (e.g., when using alternative providers like Z.ai)
+        if self.skip_usage_check:
+            logger.debug("autogen.usage_check.skipped")
+            return True
 
         try:
             checker = ProPlanUsageChecker(command=self.usage_command)
