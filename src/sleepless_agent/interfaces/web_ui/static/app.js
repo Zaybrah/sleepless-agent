@@ -2,6 +2,9 @@
 
 let currentConfig = {};
 
+// Constants
+const RESTART_DELAY_MS = 2000; // Delay between stop and start during restart
+
 // Load configuration from server
 async function loadConfig() {
     try {
@@ -252,7 +255,7 @@ async function restartAgent() {
         }
         
         showMessage('Agent stopped, waiting before restart...', 'success');
-        await new Promise(resolve => setTimeout(resolve, 2000));
+        await new Promise(resolve => setTimeout(resolve, RESTART_DELAY_MS));
         
         // Start the agent
         const startResponse = await fetch('/api/agent/start', { method: 'POST' });

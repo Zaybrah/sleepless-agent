@@ -98,8 +98,11 @@ class BasicAuthMiddleware(BaseHTTPMiddleware):
             credentials = base64.b64decode(auth_header[6:]).decode("utf-8")
             username, password = credentials.split(":", 1)
             
-            # Verify credentials
-            if username == WEBUI_USERNAME and password == WEBUI_PASSWORD:
+            # Verify credentials using constant-time comparison to prevent timing attacks
+            username_match = secrets.compare_digest(username, WEBUI_USERNAME)
+            password_match = secrets.compare_digest(password, WEBUI_PASSWORD)
+            
+            if username_match and password_match:
                 return await call_next(request)
         except Exception as e:
             logger.error(f"Auth error: {e}")
@@ -120,19 +123,28 @@ def is_daemon_running() -> tuple[bool, int | None]:
             pid = int(DAEMON_PID_FILE.read_text().strip())
             if psutil.pid_exists(pid):
                 proc = psutil.Process(pid)
-                # Verify it's actually our daemon
-                if "sle" in " ".join(proc.cmdline()) or "sleepless" in " ".join(proc.cmdline()):
+                # Verify it's actually our daemon by checking for exact command pattern
+                cmdline = proc.cmdline()
+                if len(cmdline) >= 2 and cmdline[0].endswith('python') and 'sle' in cmdline[1] and 'daemon' in cmdline:
+                    return True, pid
+                # Alternative check for direct invocation
+                if 'sleepless_agent' in ' '.join(cmdline) and 'daemon' in cmdline:
                     return True, pid
         except (ValueError, psutil.NoSuchProcess, psutil.AccessDenied):
             pass
     
-    # Check if there's a global daemon running
+    # Check if there's a global daemon running by looking for specific command pattern
     for proc in psutil.process_iter(['pid', 'name', 'cmdline']):
         try:
             cmdline = proc.info.get('cmdline', [])
-            if cmdline and any('sle' in str(arg) or 'sleepless-agent' in str(arg) for arg in cmdline):
-                if 'daemon' in cmdline:
-                    return True, proc.info['pid']
+            if not cmdline:
+                continue
+            
+            # Look for exact 'sle daemon' or 'sleepless-agent daemon' pattern
+            cmdline_str = ' '.join(cmdline)
+            if ('sle daemon' in cmdline_str or 'sleepless-agent daemon' in cmdline_str or 
+                'sleepless_agent.core.daemon' in cmdline_str):
+                return True, proc.info['pid']
         except (psutil.NoSuchProcess, psutil.AccessDenied):
             continue
     
