@@ -39,9 +39,6 @@ services:
       # Optional: Mount git config from host
       # - ~/.gitconfig:/root/.gitconfig:ro
     
-    # Network configuration
-    networks:
-      - sleepless-network
     
     # Note: Health check is inherited from Dockerfile
     # Uncomment below to override if needed
@@ -51,10 +48,6 @@ services:
     #   timeout: 10s
     #   retries: 3
     #   start_period: 5s
-
-networks:
-  sleepless-network:
-    driver: bridge
 
 # Optional: Use named volumes instead of bind mounts for better portability
 volumes:
