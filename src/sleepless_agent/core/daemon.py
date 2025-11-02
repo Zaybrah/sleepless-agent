@@ -74,6 +74,7 @@ class SleeplessAgent:
             threshold_night=self.config.claude_code.threshold_night,
             night_start_hour=self.config.claude_code.night_start_hour,
             night_end_hour=self.config.claude_code.night_end_hour,
+            skip_usage_check=self.config.claude_code.skip_usage_check,
         )
 
         self.auto_generator = AutoTaskGenerator(
@@ -86,6 +87,7 @@ class SleeplessAgent:
             threshold_night=self.config.claude_code.threshold_night,
             night_start_hour=self.config.claude_code.night_start_hour,
             night_end_hour=self.config.claude_code.night_end_hour,
+            skip_usage_check=self.config.claude_code.skip_usage_check,
         )
 
         self.claude = ClaudeCodeExecutor(

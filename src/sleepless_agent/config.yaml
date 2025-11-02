@@ -6,6 +6,7 @@ claude_code:
   threshold_day: 20.0
   threshold_night: 80.0
   usage_command: claude /usage
+  skip_usage_check: false  # Set to true when using alternative providers (e.g., Z.ai) that don't have usage limits
 
 git:
   use_remote_repo: true

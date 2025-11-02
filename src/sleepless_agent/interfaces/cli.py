@@ -140,18 +140,19 @@ def command_check(ctx: CLIContext) -> int:
     entries = _load_metrics(ctx.logs_dir)
     metrics_summary = _summarize_metrics(entries)
 
-    # Get Pro plan usage info with threshold (only show if usage > 0)
+    # Get Pro plan usage info with threshold (only show if usage > 0 and not skipped)
     pro_plan_usage_info = ""
     try:
-        from sleepless_agent.monitoring.pro_plan_usage import ProPlanUsageChecker
-        from sleepless_agent.scheduling.time_utils import is_nighttime
-        checker = ProPlanUsageChecker(
-            command=config.claude_code.usage_command,
-        )
-        usage_percent, _ = checker.get_usage()
-        if usage_percent > 0:
-            threshold = config.claude_code.threshold_night if is_nighttime(night_start_hour=config.claude_code.night_start_hour, night_end_hour=config.claude_code.night_end_hour) else config.claude_code.threshold_day
-            pro_plan_usage_info = f" • Pro Usage: {usage_percent:.0f}% / {threshold:.0f}% limit"
+        if not config.claude_code.skip_usage_check:
+            from sleepless_agent.monitoring.pro_plan_usage import ProPlanUsageChecker
+            from sleepless_agent.scheduling.time_utils import is_nighttime
+            checker = ProPlanUsageChecker(
+                command=config.claude_code.usage_command,
+            )
+            usage_percent, _ = checker.get_usage()
+            if usage_percent > 0:
+                threshold = config.claude_code.threshold_night if is_nighttime(night_start_hour=config.claude_code.night_start_hour, night_end_hour=config.claude_code.night_end_hour) else config.claude_code.threshold_day
+                pro_plan_usage_info = f" • Pro Usage: {usage_percent:.0f}% / {threshold:.0f}% limit"
     except Exception as exc:
         logger.debug(f"Could not fetch Pro plan usage for dashboard: {exc}")
 

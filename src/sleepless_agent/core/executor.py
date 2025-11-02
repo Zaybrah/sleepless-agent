@@ -1059,7 +1059,7 @@ Output should include:
             # Note: We'll do this right before the usage check so we have access to task_id, project_id, etc.
             # This is done in the execute_task orchestration method, not here
 
-            # Check Pro plan usage after evaluation (mandatory)
+            # Check Pro plan usage after evaluation (mandatory unless disabled)
             try:
                 from sleepless_agent.utils.config import get_config
                 from sleepless_agent.monitoring.pro_plan_usage import ProPlanUsageChecker
@@ -1067,31 +1067,36 @@ Output should include:
                 from sleepless_agent.scheduling.time_utils import is_nighttime
 
                 config = get_config()
-                logger.debug("executor.usage.checking")
-                checker = ProPlanUsageChecker(
-                    command=config.claude_code.usage_command,
-                )
-
-                # Use time-based threshold
-                threshold = config.claude_code.threshold_night if is_nighttime(night_start_hour=config.claude_code.night_start_hour, night_end_hour=config.claude_code.night_end_hour) else config.claude_code.threshold_day
-                should_pause, reset_time = checker.check_should_pause(
-                    threshold_percent=threshold
-                )
-
-                if should_pause:
-                    usage_percent, _ = checker.get_usage()
-                    logger.critical(
-                        "executor.usage.threshold_reached",
-                        usage_percent=usage_percent,
-                        threshold_percent=threshold,
-                    )
-                    raise PauseException(
-                        message=f"Pro plan usage limit reached at {usage_percent:.1f}%",
-                        reset_time=reset_time,
-                        usage_percent=usage_percent,
-                    )
+                
+                # Skip usage check if configured (e.g., when using alternative providers like Z.ai)
+                if config.claude_code.skip_usage_check:
+                    logger.debug("executor.usage.skipped")
                 else:
-                    logger.debug("executor.usage.ready")
+                    logger.debug("executor.usage.checking")
+                    checker = ProPlanUsageChecker(
+                        command=config.claude_code.usage_command,
+                    )
+
+                    # Use time-based threshold
+                    threshold = config.claude_code.threshold_night if is_nighttime(night_start_hour=config.claude_code.night_start_hour, night_end_hour=config.claude_code.night_end_hour) else config.claude_code.threshold_day
+                    should_pause, reset_time = checker.check_should_pause(
+                        threshold_percent=threshold
+                    )
+
+                    if should_pause:
+                        usage_percent, _ = checker.get_usage()
+                        logger.critical(
+                            "executor.usage.threshold_reached",
+                            usage_percent=usage_percent,
+                            threshold_percent=threshold,
+                        )
+                        raise PauseException(
+                            message=f"Pro plan usage limit reached at {usage_percent:.1f}%",
+                            reset_time=reset_time,
+                            usage_percent=usage_percent,
+                        )
+                    else:
+                        logger.debug("executor.usage.ready")
 
             except PauseException:
                 # Re-raise PauseException to be caught by caller

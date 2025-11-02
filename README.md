@@ -270,8 +270,8 @@ The agent automatically monitors Claude Code usage and intelligently manages tas
 4. **Automatic Resume** - Tasks resume when usage resets
 
 **Time-Based Configuration (configurable in `config.yaml`):**
-- **Nighttime (1 AM - 9 AM by default):** 96% threshold - agent works aggressively while you sleep
-- **Daytime (9 AM - 1 AM by default):** 95% threshold - preserves capacity for your manual usage
+- **Nighttime (1 AM - 9 AM by default):** 80% threshold - agent works aggressively while you sleep
+- **Daytime (9 AM - 1 AM by default):** 20% threshold - preserves capacity for your manual usage
 - Configure via: `claude_code.threshold_day`, `claude_code.threshold_night`
 - Time ranges via: `claude_code.night_start_hour`, `claude_code.night_end_hour`
 
@@ -285,6 +285,18 @@ The agent automatically monitors Claude Code usage and intelligently manages tas
 - ✅ Running tasks complete normally
 - 📋 Pending tasks wait in queue
 - ⏱️ Automatic resume when usage resets
+
+**Alternative Providers (Z.ai, etc.):**
+
+If you're using an alternative API provider like [Z.ai](https://docs.z.ai/scenario-example/develop-tools/claude) that doesn't have the same usage limits as Claude Code Pro, you can disable usage monitoring:
+
+```yaml
+# In config.yaml
+claude_code:
+  skip_usage_check: true  # Disable usage monitoring for unlimited providers
+```
+
+This allows the agent to run continuously without checking or enforcing usage limits, which is ideal for providers offering unlimited usage within their subscription plans.
 
 ### Git Management
 

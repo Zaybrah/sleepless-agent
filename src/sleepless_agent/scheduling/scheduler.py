@@ -196,6 +196,7 @@ class SmartScheduler:
         threshold_night: float = 80.0,
         night_start_hour: int = 20,
         night_end_hour: int = 8,
+        skip_usage_check: bool = False,
     ):
         """Initialize scheduler
 
@@ -209,6 +210,7 @@ class SmartScheduler:
             threshold_night: Pause threshold during nighttime (default: 80%)
             night_start_hour: Hour when night starts (default: 20 for 8 PM)
             night_end_hour: Hour when night ends (default: 8 for 8 AM)
+            skip_usage_check: Skip usage checks (for alternative providers like Z.ai)
         """
         self.task_queue = task_queue
         self.max_parallel_tasks = max_parallel_tasks
@@ -217,6 +219,7 @@ class SmartScheduler:
         self.threshold_night = threshold_night
         self.night_start_hour = night_start_hour
         self.night_end_hour = night_end_hour
+        self.skip_usage_check = skip_usage_check
 
         # Budget management with time-based allocation
         session = self.task_queue.SessionLocal()
@@ -226,17 +229,21 @@ class SmartScheduler:
             night_quota_percent=night_quota_percent,
         )
 
-        # Pro plan usage checker (mandatory)
-        try:
-            from sleepless_agent.monitoring.pro_plan_usage import ProPlanUsageChecker
-            self.usage_checker = ProPlanUsageChecker(command=usage_command)
-            logger.debug(
-                "scheduler.usage_checker.ready",
-                command=usage_command,
-            )
-        except ImportError:
-            logger.error("scheduler.usage_checker.unavailable")
-            raise RuntimeError("ProPlanUsageChecker not available - required for scheduling")
+        # Pro plan usage checker (mandatory unless disabled)
+        self.usage_checker = None
+        if not skip_usage_check:
+            try:
+                from sleepless_agent.monitoring.pro_plan_usage import ProPlanUsageChecker
+                self.usage_checker = ProPlanUsageChecker(command=usage_command)
+                logger.debug(
+                    "scheduler.usage_checker.ready",
+                    command=usage_command,
+                )
+            except ImportError:
+                logger.error("scheduler.usage_checker.unavailable")
+                raise RuntimeError("ProPlanUsageChecker not available - required for scheduling")
+        else:
+            logger.info("scheduler.usage_checker.skipped")
 
         # Legacy credit window support
         self.active_windows: List[CreditWindow] = []
@@ -254,12 +261,13 @@ class SmartScheduler:
 
         # Check if we need a new window
         if not self.current_window or not self.current_window.is_active():
-            # Get actual reset time from usage checker
+            # Get actual reset time from usage checker (if enabled)
             reset_time = None
-            try:
-                _, reset_time = self.usage_checker.get_usage()
-            except Exception as e:
-                logger.debug("scheduler.credit_window.reset_time_unavailable", error=str(e))
+            if self.usage_checker:
+                try:
+                    _, reset_time = self.usage_checker.get_usage()
+                except Exception as e:
+                    logger.debug("scheduler.credit_window.reset_time_unavailable", error=str(e))
 
             # Create window with actual reset time or fall back to 5-hour window
             self.current_window = CreditWindow(start_time=now, end_time=reset_time)
@@ -279,6 +287,14 @@ class SmartScheduler:
         """
         now = datetime.now(timezone.utc).replace(tzinfo=None)
 
+        # Skip usage checks if disabled (e.g., when using alternative providers like Z.ai)
+        if not self.usage_checker:
+            context = {
+                "event": "scheduler.usage_check.skipped",
+                "decision_logic": "Usage checks disabled - proceeding with scheduling",
+            }
+            return True, context
+
         # Check if we're in a pause window
         if self.usage_pause_until:
             if now < self.usage_pause_until:
@@ -294,7 +310,7 @@ class SmartScheduler:
             # Pause window has expired; resume normal checks.
             self.usage_pause_until = None
 
-        # Check live usage (mandatory)
+        # Check live usage (mandatory when usage_checker is enabled)
         try:
             usage_percent, reset_time = self.usage_checker.get_usage()
             effective_threshold = self._get_effective_threshold()
