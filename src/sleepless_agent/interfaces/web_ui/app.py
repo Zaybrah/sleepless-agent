@@ -621,7 +621,6 @@ async def delete_path(request):
             )
         
         # Delete file or folder
-        import shutil
         if target_path.is_dir():
             shutil.rmtree(target_path)
             logger.info(f"Folder deleted: {path_param}")

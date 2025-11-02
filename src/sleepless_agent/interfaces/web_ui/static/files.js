@@ -3,6 +3,9 @@
 let currentPath = "";
 let newItemType = "file"; // "file" or "folder"
 
+// Constants
+const EDITOR_OPEN_DELAY_MS = 500; // Delay before opening editor after file creation to allow UI to update
+
 // Load file list
 async function loadFiles(path = "") {
     const fileList = document.getElementById('file-list');
@@ -266,8 +269,8 @@ async function createItem() {
                 showMessage('✅ File created successfully', 'success');
                 hideModal('new-item-modal');
                 loadFiles(currentPath);
-                // Open the new file for editing
-                setTimeout(() => editFile(path), 500);
+                // Open the new file for editing after a brief delay to allow the file list to update
+                setTimeout(() => editFile(path), EDITOR_OPEN_DELAY_MS);
             } else {
                 showMessage('❌ Error creating file: ' + data.error, 'error');
             }
