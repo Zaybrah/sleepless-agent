@@ -18,6 +18,12 @@ services:
       - LOG_LEVEL=${LOG_LEVEL:-INFO}
       - GIT_USER_NAME=${GIT_USER_NAME:-Sleepless Agent}
       - GIT_USER_EMAIL=${GIT_USER_EMAIL:-agent@sleepless.local}
+      - WEBUI_USERNAME=${WEBUI_USERNAME:-admin}
+      - WEBUI_PASSWORD=${WEBUI_PASSWORD:-}
+    
+    # Expose webui port
+    ports:
+      - "8080:8080"
     
     # Mount persistent workspace data
     volumes:

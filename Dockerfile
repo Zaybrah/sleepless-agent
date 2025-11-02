@@ -86,5 +86,8 @@ VOLUME ["/app/workspace"]
 HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
     CMD python -c "from sleepless_agent import __version__" || exit 1
 
-# Default command to start the daemon
-CMD ["sle", "daemon"]
+# Expose webui port
+EXPOSE 8080
+
+# Default command to start the webui (changed from daemon)
+CMD ["sle", "webui", "--host", "0.0.0.0", "--port", "8080"]

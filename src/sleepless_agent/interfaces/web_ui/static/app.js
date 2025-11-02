@@ -25,6 +25,7 @@ function populateForm(config) {
     if (config.claude_code) {
         document.getElementById('claude-binary').value = config.claude_code.binary_path || '';
         document.getElementById('claude-model').value = config.claude_code.model || '';
+        document.getElementById('skip-usage-check').checked = config.claude_code.skip_usage_check || false;
         document.getElementById('threshold-day').value = config.claude_code.threshold_day || '';
         document.getElementById('threshold-night').value = config.claude_code.threshold_night || '';
         document.getElementById('night-start').value = config.claude_code.night_start_hour || '';
@@ -72,6 +73,7 @@ function collectFormData() {
         claude_code: {
             binary_path: document.getElementById('claude-binary').value,
             model: document.getElementById('claude-model').value,
+            skip_usage_check: document.getElementById('skip-usage-check').checked,
             threshold_day: parseFloat(document.getElementById('threshold-day').value) || 0,
             threshold_night: parseFloat(document.getElementById('threshold-night').value) || 0,
             night_start_hour: parseInt(document.getElementById('night-start').value) || 0,
@@ -158,13 +160,112 @@ function showMessage(text, type) {
     }
 }
 
+// Load agent status
+async function loadAgentStatus() {
+    try {
+        const response = await fetch('/api/agent/status');
+        const data = await response.json();
+        
+        if (data.success) {
+            const statusSpan = document.getElementById('agent-status');
+            const pidSpan = document.getElementById('agent-pid');
+            
+            if (data.running) {
+                statusSpan.textContent = '🟢 Running';
+                statusSpan.style.color = 'green';
+                pidSpan.textContent = data.pid || '—';
+                document.getElementById('start-agent-btn').disabled = true;
+                document.getElementById('stop-agent-btn').disabled = false;
+                document.getElementById('restart-agent-btn').disabled = false;
+            } else {
+                statusSpan.textContent = '🔴 Stopped';
+                statusSpan.style.color = 'red';
+                pidSpan.textContent = '—';
+                document.getElementById('start-agent-btn').disabled = false;
+                document.getElementById('stop-agent-btn').disabled = true;
+                document.getElementById('restart-agent-btn').disabled = true;
+            }
+        }
+    } catch (error) {
+        console.error('Error loading agent status:', error);
+    }
+}
+
+// Start agent
+async function startAgent() {
+    const btn = document.getElementById('start-agent-btn');
+    btn.disabled = true;
+    
+    try {
+        const response = await fetch('/api/agent/start', { method: 'POST' });
+        const data = await response.json();
+        
+        if (data.success) {
+            showMessage('✅ Agent started successfully', 'success');
+            await loadAgentStatus();
+        } else {
+            showMessage('❌ Error starting agent: ' + data.error, 'error');
+            btn.disabled = false;
+        }
+    } catch (error) {
+        showMessage('❌ Error starting agent: ' + error.message, 'error');
+        btn.disabled = false;
+    }
+}
+
+// Stop agent
+async function stopAgent() {
+    const btn = document.getElementById('stop-agent-btn');
+    btn.disabled = true;
+    
+    try {
+        const response = await fetch('/api/agent/stop', { method: 'POST' });
+        const data = await response.json();
+        
+        if (data.success) {
+            showMessage('✅ Agent stopped successfully', 'success');
+            await loadAgentStatus();
+        } else {
+            showMessage('❌ Error stopping agent: ' + data.error, 'error');
+            btn.disabled = false;
+        }
+    } catch (error) {
+        showMessage('❌ Error stopping agent: ' + error.message, 'error');
+        btn.disabled = false;
+    }
+}
+
+// Restart agent
+async function restartAgent() {
+    const btn = document.getElementById('restart-agent-btn');
+    btn.disabled = true;
+    
+    try {
+        await stopAgent();
+        await new Promise(resolve => setTimeout(resolve, 2000));
+        await startAgent();
+    } catch (error) {
+        showMessage('❌ Error restarting agent: ' + error.message, 'error');
+    } finally {
+        btn.disabled = false;
+    }
+}
+
 // Initialize the page
 document.addEventListener('DOMContentLoaded', () => {
     loadConfig();
+    loadAgentStatus();
+    
+    // Refresh agent status periodically
+    setInterval(loadAgentStatus, 5000);
     
     document.getElementById('save-btn').addEventListener('click', saveConfig);
     document.getElementById('reload-btn').addEventListener('click', () => {
         loadConfig();
         showMessage('Configuration reloaded', 'success');
     });
+    
+    document.getElementById('start-agent-btn').addEventListener('click', startAgent);
+    document.getElementById('stop-agent-btn').addEventListener('click', stopAgent);
+    document.getElementById('restart-agent-btn').addEventListener('click', restartAgent);
 });
