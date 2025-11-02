@@ -397,6 +397,26 @@ The agent intelligently processes different task types:
 
 ## 🚢 Deployment
 
+### Docker (Recommended)
+
+The easiest way to run Sleepless Agent is using Docker:
+
+```bash
+# Clone and setup
+git clone https://github.com/context-machine-lab/sleepless-agent.git
+cd sleepless-agent
+cp .env.example .env
+# Edit .env with your tokens
+
+# Start with Docker Compose
+docker-compose up -d
+
+# View logs
+docker-compose logs -f
+```
+
+For detailed Docker instructions, see [Docker Setup Guide](docs/docker.md).
+
 ### Linux (systemd)
 ```bash
 make install-service
