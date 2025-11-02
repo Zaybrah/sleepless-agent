@@ -135,6 +135,11 @@ Set:
 
 (Claude API key no longer needed - uses Claude Code CLI)
 
+**Using Z.ai instead of Claude Code Pro?** See the [Z.ai Configuration Guide](docs/guides/z-ai-setup.md) for setup instructions, including:
+- API key configuration
+- Environment variable setup
+- GLM model selection
+
 ### 4. Run
 
 ```bash
@@ -330,6 +335,8 @@ claude_code:
 
 This allows the agent to run continuously without checking or enforcing usage limits, which is ideal for providers offering unlimited usage within their subscription plans.
 
+**For complete Z.ai setup instructions, including environment variables and API key configuration, see the [Z.ai Configuration Guide](docs/guides/z-ai-setup.md).**
+
 ### Git Management
 
 The agent integrates deeply with Git for automatic version control and collaboration:
@@ -516,6 +523,7 @@ For more detailed information and guides:
 - **[Quick Start](docs/quickstart.md)** - Get up and running quickly
 - **[FAQ](docs/faq.md)** - Frequently asked questions
 - **[Troubleshooting](docs/troubleshooting.md)** - Common issues and solutions
+- **[Z.ai Quick Reference](docs/z-ai-quick-reference.md)** - 5-minute Z.ai setup guide
 
 ## 🗺️ Roadmap
 

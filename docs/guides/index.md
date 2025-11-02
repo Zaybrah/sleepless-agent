@@ -20,6 +20,15 @@ Configure environment variables and settings.
 - Security best practices
 - Environment-specific settings
 
+### 🌐 [Z.ai Configuration](z-ai-setup.md)
+Set up Z.ai as an alternative API provider.
+
+- Z.ai account setup
+- Environment variable configuration
+- Model selection (GLM models)
+- Cost optimization
+- Troubleshooting
+
 ### 🔗 [Git Integration](git-integration.md)
 Set up automated Git workflows.
 
@@ -27,6 +36,14 @@ Set up automated Git workflows.
 - Commit automation
 - Pull request creation
 - Multi-repo management
+
+### 🖥️ [Web UI](web-ui.md)
+Configure and use the web-based interface.
+
+- Launch web UI
+- Configuration management
+- Daemon control
+- Security settings
 
 ## Advanced Guides
 
