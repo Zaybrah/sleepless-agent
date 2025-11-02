@@ -6,9 +6,15 @@ FROM node:20-slim AS node-builder
 
 # Install Claude Code CLI globally
 # Note: This may fail in corporate environments with proxies/certificates
-# In that case, use docker-compose to mount claude from host
+# If installation fails, you have several options:
+#   1. Install after container starts: docker exec sleepless-agent npm install -g @anthropic-ai/claude-code
+#   2. Mount from host: -v /usr/local/bin/claude:/usr/local/bin/claude:ro
+#   3. Set CLAUDE_CODE_BINARY_PATH environment variable to custom path
 RUN npm install -g @anthropic-ai/claude-code 2>&1 || \
-    echo "Warning: Claude Code CLI not installed. Install separately or mount from host."
+    (echo "Warning: Claude Code CLI installation failed." && \
+     echo "This is often due to network/certificate issues in corporate environments." && \
+     echo "You can install it manually after container starts or mount from host." && \
+     echo "See docs/docker.md for detailed instructions.")
 
 # Stage 2: Final application image
 FROM python:3.11-slim

@@ -40,13 +40,14 @@ services:
     networks:
       - sleepless-network
     
-    # Healthcheck configuration (overrides Dockerfile HEALTHCHECK if needed)
-    healthcheck:
-      test: ["CMD", "python", "-c", "from sleepless_agent import __version__"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 5s
+    # Note: Health check is inherited from Dockerfile
+    # Uncomment below to override if needed
+    # healthcheck:
+    #   test: ["CMD", "python", "-c", "from sleepless_agent import __version__"]
+    #   interval: 30s
+    #   timeout: 10s
+    #   retries: 3
+    #   start_period: 5s
 
 networks:
   sleepless-network:

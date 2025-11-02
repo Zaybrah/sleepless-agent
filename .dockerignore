@@ -63,7 +63,9 @@ temp/
 .github/
 
 # Development files
-Makefile
+# Note: Makefile is included in the image for running make commands inside container
+# Only Makefile.docker is excluded as it's a development convenience file
+Makefile.docker
 
 # Assets
 assets/
