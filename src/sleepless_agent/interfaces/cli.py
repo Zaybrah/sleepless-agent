@@ -859,6 +859,11 @@ def build_parser() -> argparse.ArgumentParser:
     trash_parser.add_argument("subcommand", nargs="?", default="list", help="list (default) | restore | empty")
     trash_parser.add_argument("identifier", nargs="?", help="Project ID or name (for restore)")
 
+    # WebUI command - launch web interface
+    webui_parser = subparsers.add_parser("webui", help="Launch web UI for configuration management")
+    webui_parser.add_argument("--host", default="127.0.0.1", help="Host to bind to (default: 127.0.0.1)")
+    webui_parser.add_argument("--port", type=int, default=8080, help="Port to bind to (default: 8080)")
+
     return parser
 
 
@@ -867,6 +872,12 @@ def main(argv: Optional[list[str]] = None) -> int:
 
     parser = build_parser()
     args = parser.parse_args(argv)
+
+    # WebUI doesn't need context
+    if args.command == "webui":
+        from sleepless_agent.interfaces.web_ui.app import run_server
+        run_server(host=args.host, port=args.port)
+        return 0
 
     ctx = build_context(args)
 
