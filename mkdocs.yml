@@ -83,6 +83,7 @@ nav:
     - FAQ: faq.md
     - Troubleshooting: troubleshooting.md
     - Changelog: changelog.md
+    - Z.ai Quick Reference: z-ai-quick-reference.md
 
   - Concepts:
     - concepts/index.md

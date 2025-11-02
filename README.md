@@ -523,6 +523,7 @@ For more detailed information and guides:
 - **[Quick Start](docs/quickstart.md)** - Get up and running quickly
 - **[FAQ](docs/faq.md)** - Frequently asked questions
 - **[Troubleshooting](docs/troubleshooting.md)** - Common issues and solutions
+- **[Z.ai Quick Reference](docs/z-ai-quick-reference.md)** - 5-minute Z.ai setup guide
 
 ## 🗺️ Roadmap
 
