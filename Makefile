@@ -1,4 +1,4 @@
-.PHONY: help setup run dev logs clean test db db-reset
+.PHONY: help setup run dev logs clean test db db-reset docker-build docker-up docker-down docker-logs docker-shell docker-check docker-clean docker-test
 
 help:
 	@echo "Sleepless Agent - Commands"
@@ -13,6 +13,14 @@ help:
 	@echo "clean              Clean cache and logs"
 	@echo "install-service    Install as systemd service (Linux)"
 	@echo "install-launchd    Install as launchd service (macOS)"
+	@echo ""
+	@echo "Docker Commands:"
+	@echo "docker-build       Build Docker image"
+	@echo "docker-up          Start Docker services"
+	@echo "docker-down        Stop Docker services"
+	@echo "docker-logs        View Docker logs"
+	@echo "docker-check       Run health check"
+	@echo "docker-test        Validate Docker setup"
 
 setup:
 	python -m venv venv
@@ -89,3 +97,28 @@ backup:
 	@mkdir -p backups
 	@tar czf backups/sleepless-agent-$$(date +%Y%m%d-%H%M%S).tar.gz workspace/data/
 	@echo "✓ Backup created"
+
+# Docker Commands
+docker-build:
+	docker compose build
+
+docker-up:
+	docker compose up -d
+
+docker-down:
+	docker compose down
+
+docker-logs:
+	docker compose logs -f
+
+docker-shell:
+	docker exec -it sleepless-agent /bin/bash
+
+docker-check:
+	docker exec sleepless-agent sle check
+
+docker-clean:
+	docker compose down -v
+
+docker-test:
+	bash tests/validate-docker-setup.sh

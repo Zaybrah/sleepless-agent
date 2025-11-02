@@ -1,0 +1,95 @@
+# Docker-related Makefile targets
+# Include this in your main Makefile or use directly
+
+.PHONY: docker-build docker-up docker-down docker-logs docker-shell docker-clean docker-test
+
+# Build Docker image
+docker-build:
+	docker compose build
+
+# Build without cache
+docker-build-no-cache:
+	docker compose build --no-cache
+
+# Start services
+docker-up:
+	docker compose up -d
+
+# Stop services
+docker-down:
+	docker compose down
+
+# Stop and remove volumes
+docker-down-volumes:
+	docker compose down -v
+
+# View logs
+docker-logs:
+	docker compose logs -f
+
+# View logs (last 100 lines)
+docker-logs-tail:
+	docker compose logs --tail=100 -f
+
+# Access container shell
+docker-shell:
+	docker exec -it sleepless-agent /bin/bash
+
+# Execute CLI check command
+docker-check:
+	docker exec sleepless-agent sle check
+
+# Show container status
+docker-status:
+	docker compose ps
+
+# Restart services
+docker-restart:
+	docker compose restart
+
+# Validate Docker configuration
+docker-validate:
+	@echo "Validating Docker configuration..."
+	@docker compose config > /dev/null && echo "✓ docker-compose.yml is valid" || echo "✗ docker-compose.yml has errors"
+	@test -f Dockerfile && echo "✓ Dockerfile exists" || echo "✗ Dockerfile missing"
+	@test -f .dockerignore && echo "✓ .dockerignore exists" || echo "✗ .dockerignore missing"
+
+# Clean up Docker resources
+docker-clean:
+	docker compose down -v
+	docker system prune -f
+
+# Backup workspace
+docker-backup:
+	@mkdir -p backups
+	docker exec sleepless-agent tar czf /tmp/workspace-backup.tar.gz /app/workspace
+	docker cp sleepless-agent:/tmp/workspace-backup.tar.gz ./backups/workspace-backup-$$(date +%Y%m%d-%H%M%S).tar.gz
+	@echo "✓ Backup created in backups/"
+
+# Test Docker setup
+docker-test:
+	@bash tests/validate-docker-setup.sh
+
+# Show Docker resource usage
+docker-stats:
+	docker stats sleepless-agent --no-stream
+
+# Full setup (build and start)
+docker-setup: docker-build docker-up
+	@echo "✓ Docker setup complete!"
+	@echo "View logs with: make docker-logs"
+
+# Help
+docker-help:
+	@echo "Docker commands:"
+	@echo "  make docker-build          - Build Docker image"
+	@echo "  make docker-up            - Start services"
+	@echo "  make docker-down          - Stop services"
+	@echo "  make docker-logs          - View logs"
+	@echo "  make docker-shell         - Access container shell"
+	@echo "  make docker-check         - Run health check"
+	@echo "  make docker-status        - Show container status"
+	@echo "  make docker-backup        - Backup workspace"
+	@echo "  make docker-clean         - Clean up resources"
+	@echo "  make docker-test          - Validate setup"
+	@echo "  make docker-setup         - Full setup"
