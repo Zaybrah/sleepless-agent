@@ -35,7 +35,6 @@ dependencies = [
     "psutil",
     "claude-agent-sdk",
     "requests",
-    "fastapi",
     "uvicorn[standard]",
 ]
 

@@ -76,6 +76,7 @@ function collectFormData() {
             threshold_night: parseFloat(document.getElementById('threshold-night').value) || 0,
             night_start_hour: parseInt(document.getElementById('night-start').value) || 0,
             night_end_hour: parseInt(document.getElementById('night-end').value) || 0,
+            // Preserve usage_command from existing config (not editable in UI)
             usage_command: currentConfig.claude_code?.usage_command || 'claude /usage'
         },
         git: {

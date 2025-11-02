@@ -118,7 +118,10 @@ routes = [
 ]
 
 
-app = Starlette(debug=False, routes=routes)
+# Enable debug mode via environment variable for development
+DEBUG_MODE = os.environ.get("SLEEPLESS_WEBUI_DEBUG", "false").lower() == "true"
+
+app = Starlette(debug=DEBUG_MODE, routes=routes)
 
 
 def run_server(host: str = "127.0.0.1", port: int = 8080):
