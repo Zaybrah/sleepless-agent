@@ -1,0 +1,61 @@
+version: '3.8'
+
+services:
+  sleepless-agent:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: sleepless-agent
+    restart: unless-stopped
+    
+    # Load environment variables from .env file
+    env_file:
+      - .env
+    
+    # Additional environment variables (these override .env values)
+    environment:
+      - AGENT_WORKSPACE_ROOT=/app/workspace
+      - AGENT_DB_PATH=/app/workspace/data/tasks.db
+      - AGENT_RESULTS_PATH=/app/workspace/data/results
+      - LOG_LEVEL=${LOG_LEVEL:-INFO}
+      - GIT_USER_NAME=${GIT_USER_NAME:-Sleepless Agent}
+      - GIT_USER_EMAIL=${GIT_USER_EMAIL:-agent@sleepless.local}
+    
+    # Mount persistent workspace data
+    volumes:
+      # Persistent workspace data (tasks, results, database)
+      - ./workspace:/app/workspace
+      
+      # Optional: Mount custom config to override defaults
+      # - ./custom-config.yaml:/app/src/sleepless_agent/config.yaml:ro
+      
+      # Optional: Mount Claude Code CLI from host if not installed in container
+      # - /usr/local/bin/claude:/usr/local/bin/claude:ro
+      
+      # Optional: Mount .ssh for git operations with private repositories
+      # - ~/.ssh:/root/.ssh:ro
+      
+      # Optional: Mount git config from host
+      # - ~/.gitconfig:/root/.gitconfig:ro
+    
+    # Network configuration
+    networks:
+      - sleepless-network
+    
+    # Healthcheck configuration (overrides Dockerfile HEALTHCHECK if needed)
+    healthcheck:
+      test: ["CMD", "python", "-c", "from sleepless_agent import __version__"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 5s
+
+networks:
+  sleepless-network:
+    driver: bridge
+
+# Optional: Use named volumes instead of bind mounts for better portability
+# volumes:
+#   workspace-data:
+#     driver: local
+
