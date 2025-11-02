@@ -96,6 +96,7 @@ nav:
     - guides/index.md
     - Slack Setup: guides/slack-setup.md
     - Environment Setup: guides/environment-setup.md
+    - Z.ai Configuration: guides/z-ai-setup.md
     - Git Integration: guides/git-integration.md
     - Web UI Configuration: guides/web-ui.md
     - Project Management: guides/project-management.md

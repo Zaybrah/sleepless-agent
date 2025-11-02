@@ -95,6 +95,29 @@ claude_code:
   threshold_night: 80.0 # Nighttime limit
 ```
 
+### Can I use Z.ai or other alternative API providers?
+
+Yes! Sleepless Agent supports alternative providers like Z.ai. See the [Z.ai Configuration Guide](guides/z-ai-setup.md) for complete setup instructions.
+
+**Key differences when using Z.ai:**
+- No daily usage caps (based on your Z.ai plan)
+- Uses GLM models (GLM-4.5-Air, GLM-4.6)
+- Requires setting `skip_usage_check: true` in config.yaml
+- Configure via environment variables or `~/.claude/settings.json`
+
+**Quick setup:**
+1. Get API key from [Z.ai Open Platform](https://open.bigmodel.cn/)
+2. Set environment variables:
+   ```bash
+   export ANTHROPIC_AUTH_TOKEN="your_zai_api_key"
+   export ANTHROPIC_BASE_URL="https://api.z.ai/api/anthropic"
+   ```
+3. Update config.yaml:
+   ```yaml
+   claude_code:
+     skip_usage_check: true
+   ```
+
 ### How do I check current usage?
 
 - Via CLI: `sle check`
