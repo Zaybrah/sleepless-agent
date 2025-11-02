@@ -21,14 +21,11 @@ services:
       - WEBUI_USERNAME=${WEBUI_USERNAME:-admin}
       - WEBUI_PASSWORD=${WEBUI_PASSWORD:-}
     
-    # Expose webui port
-    ports:
-      - "8080:8080"
     
     # Mount persistent workspace data
     volumes:
       # Persistent workspace data (tasks, results, database)
-      - ./workspace:/app/workspace
+      - workspace-data:/app/workspace
       
       # Optional: Mount custom config to override defaults
       # - ./custom-config.yaml:/app/src/sleepless_agent/config.yaml:ro
@@ -60,6 +57,6 @@ networks:
     driver: bridge
 
 # Optional: Use named volumes instead of bind mounts for better portability
-# volumes:
-#   workspace-data:
-#     driver: local
+volumes:
+  workspace-data:
+    driver: local
