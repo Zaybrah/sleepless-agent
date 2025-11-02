@@ -51,7 +51,7 @@ RUN ln -sf /usr/local/lib/node_modules/npm/bin/npm-cli.js /usr/local/bin/npm && 
 WORKDIR /app
 
 # Copy Python project files
-COPY pyproject.toml README.md LICENSE ./
+COPY pyproject.toml README.md LICENSE Makefile ./
 COPY src/ ./src/
 
 # Install Python dependencies and the application
@@ -88,4 +88,3 @@ HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
 
 # Default command to start the daemon
 CMD ["sle", "daemon"]
-
