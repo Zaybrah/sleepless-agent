@@ -248,11 +248,17 @@ async def start_agent(request):
                 status_code=400
             )
         
-        # Start daemon in detached mode
+        # Create log files for daemon output
+        log_dir = DAEMON_PID_FILE.parent
+        log_dir.mkdir(parents=True, exist_ok=True)
+        stdout_log = log_dir / "daemon_stdout.log"
+        stderr_log = log_dir / "daemon_stderr.log"
+        
+        # Start daemon in detached mode with logging
         DAEMON_PROCESS = subprocess.Popen(
             ["sle", "daemon"],
-            stdout=subprocess.DEVNULL,
-            stderr=subprocess.DEVNULL,
+            stdout=open(stdout_log, 'a'),
+            stderr=open(stderr_log, 'a'),
             start_new_session=True
         )
         
@@ -263,11 +269,20 @@ async def start_agent(request):
         running, pid = is_daemon_running()
         if running and pid:
             save_daemon_pid(pid)
-            logger.info(f"Agent daemon started with PID {pid}")
+            logger.info(f"Agent daemon started with PID {pid}. Logs: {stdout_log}, {stderr_log}")
             return JSONResponse({"success": True, "pid": pid})
         else:
+            # Read error logs if start failed
+            error_msg = "Failed to start agent"
+            if stderr_log.exists():
+                try:
+                    recent_errors = stderr_log.read_text().strip().split('\n')[-5:]
+                    if recent_errors:
+                        error_msg += f". Recent errors: {'; '.join(recent_errors)}"
+                except Exception:
+                    pass
             return JSONResponse(
-                {"success": False, "error": "Failed to start agent"},
+                {"success": False, "error": error_msg},
                 status_code=500
             )
     except Exception as e:
