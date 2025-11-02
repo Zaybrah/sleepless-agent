@@ -5,6 +5,7 @@ from __future__ import annotations
 import asyncio
 import os
 import secrets
+import shutil
 import signal
 import subprocess
 import psutil
@@ -180,6 +181,16 @@ async def homepage(request):
     )
 
 
+async def files_page(request):
+    """Render the file browser page."""
+    return templates.TemplateResponse(
+        "files.html",
+        {
+            "request": request,
+        }
+    )
+
+
 async def get_config_endpoint(request):
     """API endpoint to get current configuration."""
     try:
@@ -333,13 +344,316 @@ async def stop_agent(request):
         )
 
 
+def get_workspace_root() -> Path:
+    """Get the workspace root path from configuration."""
+    try:
+        config = get_config()
+        workspace_root = Path(config.agent.workspace_root).expanduser().resolve()
+        workspace_root.mkdir(parents=True, exist_ok=True)
+        return workspace_root
+    except Exception as e:
+        logger.error(f"Error getting workspace root: {e}")
+        # Fallback to default
+        default_workspace = Path("./workspace").expanduser().resolve()
+        default_workspace.mkdir(parents=True, exist_ok=True)
+        return default_workspace
+
+
+def is_path_safe(base_path: Path, target_path: Path) -> bool:
+    """Check if target_path is within base_path to prevent directory traversal attacks."""
+    try:
+        # Resolve both paths to absolute paths
+        base_resolved = base_path.resolve()
+        target_resolved = target_path.resolve()
+        # Check if target is within base
+        return target_resolved.is_relative_to(base_resolved)
+    except (ValueError, OSError):
+        return False
+
+
+async def browse_files(request):
+    """API endpoint to browse files and folders in the workspace."""
+    try:
+        workspace_root = get_workspace_root()
+        
+        # Get path parameter from query string
+        path_param = request.query_params.get("path", "")
+        
+        if path_param:
+            target_path = (workspace_root / path_param).resolve()
+        else:
+            target_path = workspace_root
+        
+        # Security check
+        if not is_path_safe(workspace_root, target_path):
+            return JSONResponse(
+                {"success": False, "error": "Access denied: path outside workspace"},
+                status_code=403
+            )
+        
+        if not target_path.exists():
+            return JSONResponse(
+                {"success": False, "error": "Path does not exist"},
+                status_code=404
+            )
+        
+        if target_path.is_file():
+            # Return file metadata
+            return JSONResponse({
+                "success": True,
+                "type": "file",
+                "name": target_path.name,
+                "path": str(target_path.relative_to(workspace_root)),
+                "size": target_path.stat().st_size,
+            })
+        else:
+            # List directory contents
+            items = []
+            for item in sorted(target_path.iterdir()):
+                try:
+                    relative_path = str(item.relative_to(workspace_root))
+                    item_data = {
+                        "name": item.name,
+                        "path": relative_path,
+                        "type": "directory" if item.is_dir() else "file",
+                    }
+                    if item.is_file():
+                        item_data["size"] = item.stat().st_size
+                    items.append(item_data)
+                except (OSError, ValueError):
+                    continue
+            
+            return JSONResponse({
+                "success": True,
+                "type": "directory",
+                "path": str(target_path.relative_to(workspace_root)) if target_path != workspace_root else "",
+                "items": items,
+            })
+    except Exception as e:
+        logger.error(f"Error browsing files: {e}")
+        return JSONResponse(
+            {"success": False, "error": str(e)},
+            status_code=500
+        )
+
+
+async def read_file(request):
+    """API endpoint to read file contents."""
+    try:
+        workspace_root = get_workspace_root()
+        
+        # Get path parameter from query string
+        path_param = request.query_params.get("path", "")
+        if not path_param:
+            return JSONResponse(
+                {"success": False, "error": "Path parameter required"},
+                status_code=400
+            )
+        
+        target_path = (workspace_root / path_param).resolve()
+        
+        # Security check
+        if not is_path_safe(workspace_root, target_path):
+            return JSONResponse(
+                {"success": False, "error": "Access denied: path outside workspace"},
+                status_code=403
+            )
+        
+        if not target_path.exists():
+            return JSONResponse(
+                {"success": False, "error": "File does not exist"},
+                status_code=404
+            )
+        
+        if not target_path.is_file():
+            return JSONResponse(
+                {"success": False, "error": "Path is not a file"},
+                status_code=400
+            )
+        
+        # Read file content
+        try:
+            content = target_path.read_text(encoding="utf-8")
+            return JSONResponse({
+                "success": True,
+                "content": content,
+                "path": str(target_path.relative_to(workspace_root)),
+                "size": target_path.stat().st_size,
+            })
+        except UnicodeDecodeError:
+            # Binary file
+            return JSONResponse(
+                {"success": False, "error": "File is binary and cannot be edited in the web UI"},
+                status_code=400
+            )
+    except Exception as e:
+        logger.error(f"Error reading file: {e}")
+        return JSONResponse(
+            {"success": False, "error": str(e)},
+            status_code=500
+        )
+
+
+async def write_file(request):
+    """API endpoint to write/update file contents."""
+    try:
+        workspace_root = get_workspace_root()
+        
+        data = await request.json()
+        path_param = data.get("path", "")
+        content = data.get("content", "")
+        
+        if not path_param:
+            return JSONResponse(
+                {"success": False, "error": "Path parameter required"},
+                status_code=400
+            )
+        
+        target_path = (workspace_root / path_param).resolve()
+        
+        # Security check
+        if not is_path_safe(workspace_root, target_path):
+            return JSONResponse(
+                {"success": False, "error": "Access denied: path outside workspace"},
+                status_code=403
+            )
+        
+        # Create parent directories if they don't exist
+        target_path.parent.mkdir(parents=True, exist_ok=True)
+        
+        # Write file content
+        target_path.write_text(content, encoding="utf-8")
+        logger.info(f"File written: {target_path.relative_to(workspace_root)}")
+        
+        return JSONResponse({
+            "success": True,
+            "message": "File saved successfully",
+            "path": str(target_path.relative_to(workspace_root)),
+        })
+    except Exception as e:
+        logger.error(f"Error writing file: {e}")
+        return JSONResponse(
+            {"success": False, "error": str(e)},
+            status_code=500
+        )
+
+
+async def create_folder(request):
+    """API endpoint to create a new folder."""
+    try:
+        workspace_root = get_workspace_root()
+        
+        data = await request.json()
+        path_param = data.get("path", "")
+        
+        if not path_param:
+            return JSONResponse(
+                {"success": False, "error": "Path parameter required"},
+                status_code=400
+            )
+        
+        target_path = (workspace_root / path_param).resolve()
+        
+        # Security check
+        if not is_path_safe(workspace_root, target_path):
+            return JSONResponse(
+                {"success": False, "error": "Access denied: path outside workspace"},
+                status_code=403
+            )
+        
+        if target_path.exists():
+            return JSONResponse(
+                {"success": False, "error": "Path already exists"},
+                status_code=400
+            )
+        
+        # Create folder
+        target_path.mkdir(parents=True, exist_ok=True)
+        logger.info(f"Folder created: {target_path.relative_to(workspace_root)}")
+        
+        return JSONResponse({
+            "success": True,
+            "message": "Folder created successfully",
+            "path": str(target_path.relative_to(workspace_root)),
+        })
+    except Exception as e:
+        logger.error(f"Error creating folder: {e}")
+        return JSONResponse(
+            {"success": False, "error": str(e)},
+            status_code=500
+        )
+
+
+async def delete_path(request):
+    """API endpoint to delete a file or folder."""
+    try:
+        workspace_root = get_workspace_root()
+        
+        data = await request.json()
+        path_param = data.get("path", "")
+        
+        if not path_param:
+            return JSONResponse(
+                {"success": False, "error": "Path parameter required"},
+                status_code=400
+            )
+        
+        target_path = (workspace_root / path_param).resolve()
+        
+        # Security check
+        if not is_path_safe(workspace_root, target_path):
+            return JSONResponse(
+                {"success": False, "error": "Access denied: path outside workspace"},
+                status_code=403
+            )
+        
+        if not target_path.exists():
+            return JSONResponse(
+                {"success": False, "error": "Path does not exist"},
+                status_code=404
+            )
+        
+        # Don't allow deleting the workspace root itself
+        if target_path == workspace_root:
+            return JSONResponse(
+                {"success": False, "error": "Cannot delete workspace root"},
+                status_code=403
+            )
+        
+        # Delete file or folder
+        import shutil
+        if target_path.is_dir():
+            shutil.rmtree(target_path)
+            logger.info(f"Folder deleted: {path_param}")
+        else:
+            target_path.unlink()
+            logger.info(f"File deleted: {path_param}")
+        
+        return JSONResponse({
+            "success": True,
+            "message": "Deleted successfully",
+        })
+    except Exception as e:
+        logger.error(f"Error deleting path: {e}")
+        return JSONResponse(
+            {"success": False, "error": str(e)},
+            status_code=500
+        )
+
+
 routes = [
     Route("/", homepage),
+    Route("/files", files_page),
     Route("/api/config", get_config_endpoint, methods=["GET"]),
     Route("/api/config", update_config_endpoint, methods=["POST"]),
     Route("/api/agent/status", get_agent_status, methods=["GET"]),
     Route("/api/agent/start", start_agent, methods=["POST"]),
     Route("/api/agent/stop", stop_agent, methods=["POST"]),
+    Route("/api/files/browse", browse_files, methods=["GET"]),
+    Route("/api/files/read", read_file, methods=["GET"]),
+    Route("/api/files/write", write_file, methods=["POST"]),
+    Route("/api/files/create-folder", create_folder, methods=["POST"]),
+    Route("/api/files/delete", delete_path, methods=["POST"]),
     Mount("/static", StaticFiles(directory=str(CURRENT_DIR / "static")), name="static"),
 ]
 
