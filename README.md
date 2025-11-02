@@ -189,6 +189,7 @@ The CLI mirrors the Slack slash commands:
 | `report [identifier]` | Show task details, daily reports, or project summaries (`--list` for all reports) | `report 7` |
 | `cancel <identifier>` | Move a task or project to trash | `cancel 9` or `cancel my-app` |
 | `trash [subcommand] [identifier]` | Manage trash (list, restore, empty) | `trash restore my-app` |
+| `webui [--host HOST] [--port PORT]` | Launch web UI for configuration management | `webui --port 8080` |
 
 Override storage locations when needed:
 
@@ -257,6 +258,26 @@ sleepless-agent/
 ## ⚙️ Configuration
 
 Runtime settings come from environment variables loaded via `.env` (see `.env.example`). Update those values or export them in your shell to tune agent behavior.
+
+### Web UI Configuration
+
+The easiest way to configure the agent is through the built-in web interface:
+
+```bash
+# Launch the configuration web UI
+sle webui
+
+# Access at http://127.0.0.1:8080
+```
+
+The web UI provides a user-friendly interface to configure all agent settings including:
+- Claude Code settings (model, thresholds, night hours)
+- Git integration (remote repository, auto-create)
+- Agent settings (workspace, timeouts)
+- Multi-agent workflow (planner, worker, evaluator)
+- Auto-generation features
+
+See [Web UI Guide](docs/guides/web-ui.md) for more details.
 
 ### Usage Management
 

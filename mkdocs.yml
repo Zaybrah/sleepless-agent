@@ -97,6 +97,7 @@ nav:
     - Slack Setup: guides/slack-setup.md
     - Environment Setup: guides/environment-setup.md
     - Git Integration: guides/git-integration.md
+    - Web UI Configuration: guides/web-ui.md
     - Project Management: guides/project-management.md
     - Custom Prompts: guides/custom-prompts.md
     - Deployment: guides/deployment.md
